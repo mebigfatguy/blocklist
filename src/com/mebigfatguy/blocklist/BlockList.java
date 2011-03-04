@@ -1,5 +1,9 @@
 package com.mebigfatguy.blocklist;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -10,7 +14,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 @SuppressWarnings("unchecked")
-public class BlockList<E> implements List<E>, Serializable {
+public class BlockList<E> implements List<E>, Externalizable {
 
 	private static final long serialVersionUID = -2221663525758235084L;
 	public static final int DEFAULT_BLOCK_COUNT = 1;
@@ -37,6 +41,42 @@ public class BlockList<E> implements List<E>, Serializable {
 			blocks[b] = new Block<E>();
 		}
 		revision = 0;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof BlockList) {
+			BlockList<E> that = (BlockList<E>) o;
+			if (this.size != that.size) {
+				return false;
+			}
+
+			for (int i = 0; i < size; i++) {
+				Object thisItem = get(i);
+				Object thatItem = that.get(i);
+
+				if (thisItem == null) {
+					if (thatItem != null) {
+						return false;
+					}
+				}
+
+				if (thatItem == null) {
+					return false;
+				}
+
+				if (!thisItem.equals(thatItem)) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		return size;
 	}
 
 	@Override
@@ -123,7 +163,7 @@ public class BlockList<E> implements List<E>, Serializable {
 	}
 
 	@Override
-	public boolean containsAll(Collection elements) {
+	public boolean containsAll(Collection<?> elements) {
 		for (Object o : elements) {
 			if (!contains(o)) {
 				return false;
@@ -437,5 +477,45 @@ public class BlockList<E> implements List<E>, Serializable {
 			iteratorRevision = revision;
 		}
 
+	}
+
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		out.writeInt(blockSize);
+		out.writeInt(size);
+
+		for (Block<E> blk : blocks) {
+			for (int s = 0; s < blk.emptyPos; s++) {
+				out.writeObject(blk.slots[s]);
+			}
+		}
+	}
+
+	@Override
+	public void readExternal(ObjectInput in) throws IOException,
+			ClassNotFoundException {
+
+		blockSize = in.readInt();
+		size = in.readInt();
+
+		int numBlocks = (size + (blockSize - 1)) / blockSize;
+		if (numBlocks > DEFAULT_BLOCK_COUNT) {
+			blocks = new Block[numBlocks];
+		}
+
+		int pos = 0;
+		for (int i = 0; i < numBlocks; i++) {
+			Block<E> block = new Block<E>();
+			int j;
+			for (j = 0; j < blockSize; j++) {
+				if (pos++ >= size) {
+					break;
+				}
+
+				block.slots[j] = (E)in.readObject();
+			}
+			block.emptyPos = j;
+			blocks[i] = block;
+		}
 	}
 }

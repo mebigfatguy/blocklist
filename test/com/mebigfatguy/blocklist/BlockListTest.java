@@ -1,5 +1,10 @@
 package com.mebigfatguy.blocklist;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.Iterator;
 
@@ -36,7 +41,7 @@ public class BlockListTest {
 			Assert.assertEquals("Hello" + i, bl.get(i));
 		}
 	}
-	
+
 	@Test
 	public void testRemove20() {
 		BlockList<String> bl = new BlockList<String>();
@@ -51,10 +56,10 @@ public class BlockListTest {
 		}
 		for (int i = 19; i >= 0; i--) {
 			bl.remove(0);
-		}		
+		}
 		Assert.assertEquals(0, bl.size());
 	}
-	
+
 	@Test
 	public void testRemoveAll20() {
 		BlockList<String> bl = new BlockList<String>();
@@ -64,7 +69,7 @@ public class BlockListTest {
 		bl.removeAll(Arrays.asList(new String[] { "Hello2", "Hello17"}));
 		Assert.assertEquals(18, bl.size());
 	}
-	
+
 	@Test
 	public void testRetainAll20() {
 		BlockList<String> bl = new BlockList<String>();
@@ -74,32 +79,52 @@ public class BlockListTest {
 		bl.retainAll(Arrays.asList(new String[] { "Hello2", "Hello17"}));
 		Assert.assertEquals(2, bl.size());
 	}
-	
+
 	@Test
 	public void testToArray() {
 		BlockList<String> bl = new BlockList<String>();
 		for (int i = 0; i < 20; i++) {
 			bl.add(i, "Hello" + i);
 		}
-		
+
 		String[] result = bl.toArray(new String[0]);
 		Assert.assertEquals(20, result.length);
-		
+
 		result = bl.toArray(new String[20]);
-		Assert.assertEquals(20, result.length);		
+		Assert.assertEquals(20, result.length);
 	}
-	
+
 	@Test
 	public void testIterator() {
 		BlockList<String> bl = new BlockList<String>();
 		for (int i = 0; i < 20; i++) {
 			bl.add(i, "Hello" + i);
 		}
-		
+
 		int pos = 0;
 		Iterator<String> it = bl.iterator();
 		while (it.hasNext()) {
 			Assert.assertEquals("Hello" + pos++, it.next());
 		}
+	}
+
+	@Test
+	public void testSerialization() throws IOException, ClassNotFoundException {
+		BlockList<String> bl = new BlockList<String>();
+		for (int i = 0; i < 20; i++) {
+			bl.add(i, "Hello" + i);
+		}
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(baos);
+		oos.writeObject(bl);
+		oos.flush();
+
+		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		ObjectInputStream ois = new ObjectInputStream(bais);
+
+		BlockList<String> sbl = (BlockList<String>)ois.readObject();
+
+		Assert.assertEquals(bl, sbl);
 	}
 }

@@ -237,12 +237,12 @@ public class BlockList<E> implements List<E>, Externalizable {
 
 	@Override
 	public ListIterator<E> listIterator() {
-		return null;
+		throw new UnsupportedOperationException("listIterator");
 	}
 
 	@Override
 	public ListIterator<E> listIterator(int index) {
-		return null;
+		throw new UnsupportedOperationException("listIterator");
 	}
 
 	@Override

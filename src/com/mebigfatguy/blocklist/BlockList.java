@@ -15,7 +15,7 @@ public class BlockList<E> implements List<E>, Serializable {
 	private static final long serialVersionUID = -2221663525758235084L;
 	public static final int DEFAULT_BLOCK_COUNT = 1;
 	public static final int DEFAULT_BLOCK_SIZE = 16;
-	
+
 	private Block<E>[] blocks;
 	private int blockSize;
 	private int size;
@@ -24,11 +24,11 @@ public class BlockList<E> implements List<E>, Serializable {
 	public BlockList() {
 		this(DEFAULT_BLOCK_SIZE);
 	}
-	
+
 	public BlockList(int blockSize) {
 		this(DEFAULT_BLOCK_COUNT, blockSize);
 	}
-	
+
 	public BlockList(int initialBlkCount, int blkSize) {
 		blocks = new Block[initialBlkCount];
 		blockSize = blkSize;
@@ -46,7 +46,7 @@ public class BlockList<E> implements List<E>, Serializable {
 			grow();
 			blockPtr = ((long)(blocks.length - 1)) << 32;
 		}
-		
+
 		int blkIndex = (int)(blockPtr >> 32);
 		Block<E> blk = blocks[blkIndex];
 		blk.slots[blk.emptyPos++] = element;
@@ -62,17 +62,17 @@ public class BlockList<E> implements List<E>, Serializable {
 			grow();
 			blockPtr = ((long)(blocks.length - 1)) << 32;
 		}
-		
+
 		int blkIndex = (int)(blockPtr >> 32);
 		int blkOffset = (int)blockPtr;
-		
+
 		Block<E> blk = blocks[blkIndex];
 		if (blk.emptyPos == blockSize){
 			splitBlock(blkIndex, blkOffset);
 		} else if (blkOffset < blk.emptyPos) {
 			System.arraycopy(blk.slots, blkOffset, blk.slots, blkOffset + 1, blk.emptyPos - blkOffset);
 		}
-		
+
 		blk.slots[blkOffset] = element;
 		blk.emptyPos++;
 		size++;
@@ -107,24 +107,27 @@ public class BlockList<E> implements List<E>, Serializable {
 
 	@Override
 	public boolean contains(Object element) {
-		if (element == null)
+		if (element == null) {
 			return false;
-		
+		}
+
 		for (Block<E> blk : blocks) {
 			for (int s = 0; s < blk.emptyPos; s++) {
-				if (element.equals(blk.slots[s]))
+				if (element.equals(blk.slots[s])) {
 					return true;
+				}
 			}
 		}
-		
+
 		return false;
 	}
 
 	@Override
 	public boolean containsAll(Collection elements) {
 		for (Object o : elements) {
-			if (!contains(o))
+			if (!contains(o)) {
 				return false;
+			}
 		}
 		return true;
 	}
@@ -135,28 +138,30 @@ public class BlockList<E> implements List<E>, Serializable {
 		if (blockPtr < 0) {
 			throw new IndexOutOfBoundsException("Index (" + index + ") is out of bounds [0 <= i < " + size + "]");
 		}
-		
+
 		int blkIndex = (int)(blockPtr >> 32);
 		int blkOffset = (int)blockPtr;
-		
+
 		Block<E> blk = blocks[blkIndex];
-		return (E)blk.slots[blkOffset];
+		return blk.slots[blkOffset];
 	}
 
 	@Override
 	public int indexOf(Object element) {
-		if (element == null)
+		if (element == null) {
 			return -1;
-		
+		}
+
 		int pos = 0;
 		for (Block<E> blk : blocks) {
 			for (int s = 0; s < blk.emptyPos; s++) {
-				if (element.equals(blk.slots[s]))
+				if (element.equals(blk.slots[s])) {
 					return pos;
+				}
 				pos++;
 			}
 		}
-		
+
 		return -1;
 	}
 
@@ -172,19 +177,21 @@ public class BlockList<E> implements List<E>, Serializable {
 
 	@Override
 	public int lastIndexOf(Object element) {
-		if (element == null)
+		if (element == null) {
 			return -1;
-		
+		}
+
 		int pos = size - 1;
 		for (int b = blocks.length - 1; b >= 0; b--) {
 			Block<E> blk = blocks[b];
 			for (int s = blk.emptyPos-1; s>= 0; s--) {
-				if (element.equals(blk.slots[s]))
+				if (element.equals(blk.slots[s])) {
 					return pos;
+				}
 				pos--;
 			}
 		}
-		
+
 		return -1;
 	}
 
@@ -205,7 +212,7 @@ public class BlockList<E> implements List<E>, Serializable {
 			revision++;
 			return false;
 		}
-		
+
 		remove(pos);
 		return true;
 	}
@@ -217,16 +224,16 @@ public class BlockList<E> implements List<E>, Serializable {
 			revision++;
 			throw new IndexOutOfBoundsException("Index (" + index + ") is out of bounds [0 <= i < " + size + "]");
 		}
-		
+
 		int blkIndex = (int)(blockPtr >> 32);
 		int blkOffset = (int)blockPtr;
-		
+
 		return remove(blkIndex, blkOffset);
 	}
-	
+
 	protected E remove(int blkIndex, int blkOffset) {
 		Block<E> blk = blocks[blkIndex];
-		E e = (E)blk.slots[blkOffset];
+		E e = blk.slots[blkOffset];
 		if (blk.emptyPos == 1) {
 			System.arraycopy(blocks, blkIndex+1, blocks, blkIndex, blocks.length - blkIndex - 1);
 			blocks[blocks.length - 1] = blk;
@@ -235,7 +242,7 @@ public class BlockList<E> implements List<E>, Serializable {
 
 		}
 		blk.slots[blk.emptyPos-1] = null;
-		blk.emptyPos--;		
+		blk.emptyPos--;
 		size--;
 		revision++;
 		return e;
@@ -245,7 +252,7 @@ public class BlockList<E> implements List<E>, Serializable {
 	public boolean removeAll(Collection<?> elements) {
 		boolean removed = false;
 		for (Object e : elements) {
-			removed |= remove((E)e);
+			removed |= remove(e);
 		}
 		return removed;
 	}
@@ -253,12 +260,12 @@ public class BlockList<E> implements List<E>, Serializable {
 	@Override
 	public boolean retainAll(Collection<?> elements) {
 		boolean changed = false;
-		
+
 		int pos = 0;
 		for (int b = 0; b < blocks.length; b++) {
 			Block<E> blk = blocks[b];
 			for (int s = 0; s < blk.emptyPos; s++) {
-				
+
 				if (!elements.contains(blk.slots[s])) {
 					boolean blockRemoved = (blk.emptyPos == 1);
 					remove(pos);
@@ -272,7 +279,7 @@ public class BlockList<E> implements List<E>, Serializable {
 				}
 			}
 		}
-		
+
 		revision++;
 		return changed;
 	}
@@ -280,14 +287,15 @@ public class BlockList<E> implements List<E>, Serializable {
 	@Override
 	public E set(int index, E element) {
 		long blockPtr = findBlock(index, false);
-		if (blockPtr < 0)
+		if (blockPtr < 0) {
 			throw new IndexOutOfBoundsException("Index (" + index + ") is out of bounds [0 <= i < " + size + "]");
-		
+		}
+
 		int blkIndex = (int)(blockPtr >> 32);
 		int blkOffset = (int)blockPtr;
-		
+
 		Block<E> blk = blocks[blkIndex];
-		E oldValue = (E)blk.slots[blkOffset];
+		E oldValue = blk.slots[blkOffset];
 		blk.slots[blkOffset] = element;
 		return oldValue;
 	}
@@ -319,7 +327,7 @@ public class BlockList<E> implements List<E>, Serializable {
 			Class<?> cls = proto.getClass().getComponentType();
 			proto = (AE[])Array.newInstance(cls, size);
 		}
-		
+
 		int pos = 0;
 		for (Block<E> blk : blocks) {
 			System.arraycopy(blk.slots, 0, proto, pos, blk.emptyPos);
@@ -327,7 +335,7 @@ public class BlockList<E> implements List<E>, Serializable {
 		}
 		return proto;
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(size * 10);
@@ -343,7 +351,7 @@ public class BlockList<E> implements List<E>, Serializable {
 
 	private long findBlock(int index, boolean forAdd) {
 		int offset = 0;
-		
+
 		for (int b = 0; b < blocks.length; b++) {
 			Block<E> blk = blocks[b];
 			int nextOffset = offset + blk.emptyPos;
@@ -354,14 +362,14 @@ public class BlockList<E> implements List<E>, Serializable {
 		}
 		return -1L;
 	}
-	
+
 	private void grow() {
 		Block<E>[] newBlocks = new Block[blocks.length+1];
 		System.arraycopy(blocks, 0, newBlocks, 0, blocks.length);
-		newBlocks[blocks.length] = new Block<E>();	
+		newBlocks[blocks.length] = new Block<E>();
 		blocks = newBlocks;
 	}
-	
+
 	private void splitBlock(int blockIndex, int blockOffset) {
 		Block<E>[] newBlocks = new Block[blocks.length+1];
 		System.arraycopy(blocks, 0, newBlocks, 0, blockIndex + 1);
@@ -372,45 +380,51 @@ public class BlockList<E> implements List<E>, Serializable {
 		newBlocks[blockIndex].emptyPos = blockIndex;
 		blocks = newBlocks;
 	}
-	
-	private class Block<B> {
+
+	private class Block<B> implements Serializable {
+
+		private static final long serialVersionUID = 6572073165518926427L;
+
 		B[] slots;
 		int emptyPos;
-		
+
 		Block() {
 			slots = (B[])new Object[blockSize];
 			emptyPos = 0;
 		}
 
-		@Override 
+		@Override
 		public String toString() {
 			return (emptyPos) + "|" + Arrays.toString(slots);
 		}
 	}
-	
+
 	private class BlockListIterator implements Iterator<E> {
-		
+
 		private int pos = 0;
 		private int iteratorRevision = revision;
-		
-		
+
+
 		@Override
 		public boolean hasNext() {
-			if (revision != iteratorRevision)
+			if (revision != iteratorRevision) {
 				throw new ConcurrentModificationException();
-			
+			}
+
 			return pos < size;
 		}
 
 		@Override
 		public E next() {
-			if (revision != iteratorRevision)
+			if (revision != iteratorRevision) {
 				throw new ConcurrentModificationException();
-			
-			if (pos >= size)
+			}
+
+			if (pos >= size) {
 				throw new IndexOutOfBoundsException("");
-			
-			return get(pos++);			
+			}
+
+			return get(pos++);
 		}
 
 		@Override
@@ -418,10 +432,10 @@ public class BlockList<E> implements List<E>, Serializable {
 			if (revision != iteratorRevision) {
 				throw new ConcurrentModificationException();
 			}
-			
+
 			BlockList.this.remove(pos);
 			iteratorRevision = revision;
 		}
-		
+
 	}
 }

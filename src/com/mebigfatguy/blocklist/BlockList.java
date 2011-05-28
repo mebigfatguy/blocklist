@@ -1,5 +1,5 @@
 /*
- * polycasso - BlockList an alternative java.util.List
+ * BlockList an alternative java.util.List
  * Copyright 2011 MeBigFatGuy.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");

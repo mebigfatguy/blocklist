@@ -1,4 +1,4 @@
 
 classes
 *.jar
-*.prefs
+.settings/org.eclipse.jdt.core.prefs

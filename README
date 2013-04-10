@@ -1,1 +1,9 @@
-BlockList is an implementation of java.util.List that uses static sized blocks to store items, such that inserts and deletes from the middle of the list only incur a blocksize shuffling penalty.
+BlockList is an implementation of java.util.List that uses static sized blocks to store items, 
+such that inserts and deletes from the middle of the list only incur a blocksize shuffling penalty.
+
+BlockList never needs reallocations of existing arrays, nor does it suffer from the one massive array 
+running out of memory, problem.
+
+Getting a value at an index is much faster than linked list, but marginally slower than ArrayList.
+
+

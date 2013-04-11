@@ -134,6 +134,27 @@ public class BlockListTest {
        Assert.assertEquals(66, bl.lastIndexOf("Hello" + 66));     
        Assert.assertEquals(-1, bl.lastIndexOf("Hello" + 100));     
 	}
+	
+	@Test
+	public void retainAll() {
+       BlockList<String> bl1 = new BlockList<String>();
+       for (int i = 0; i < 70; i++) {
+           bl1.add(i, "Hello" + i);
+       }
+       
+       BlockList<String> bl2 = new BlockList<String>();
+       for (int i = 50; i < 100; i++) {
+           bl2.add(i, "Hello" + i);
+       }
+       
+       bl1.retainAll(bl2);
+       
+       Assert.assertEquals(20, bl1.size());
+       Assert.assertFalse(bl1.contains("Hello" + 49));
+       Assert.assertTrue(bl1.contains("Hello" + 50));
+       Assert.assertTrue(bl1.contains("Hello" + 69));	       
+       Assert.assertFalse(bl1.contains("Hello" + 70));
+	}
 
 	@Test
 	public void testSerialization() throws IOException, ClassNotFoundException {

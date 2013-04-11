@@ -107,6 +107,20 @@ public class BlockListTest {
 			Assert.assertEquals("Hello" + pos++, it.next());
 		}
 	}
+	
+	@Test
+	public void testContains() {
+	    BlockList<String> bl = new BlockList<String>();
+        for (int i = 0; i < 20; i++) {
+            bl.add(i, "Hello" + i);
+        }
+        
+        for (String s : bl) {
+            Assert.assertTrue(bl.contains(s));
+        }
+        
+        Assert.assertFalse(bl.contains("foobar"));
+	}
 
 	@Test
 	public void testSerialization() throws IOException, ClassNotFoundException {

@@ -122,6 +122,18 @@ public class BlockListTest {
         
         Assert.assertFalse(bl.contains("foobar"));
 	}
+	
+	@Test 
+	public void testIndexOfs() {
+       BlockList<String> bl = new BlockList<String>();
+       for (int i = 0; i < 70; i++) {
+           bl.add(i, "Hello" + i);
+       }
+       
+       Assert.assertEquals(2, bl.indexOf("Hello" + 2));
+       Assert.assertEquals(66, bl.lastIndexOf("Hello" + 66));     
+       Assert.assertEquals(-1, bl.lastIndexOf("Hello" + 100));     
+	}
 
 	@Test
 	public void testSerialization() throws IOException, ClassNotFoundException {

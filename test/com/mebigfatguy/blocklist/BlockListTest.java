@@ -14,66 +14,66 @@ import org.junit.Test;
 public class BlockListTest {
 
 	@Test
-	public void testAdd20() {
+	public void testAdd70() {
 		BlockList<String> bl = new BlockList<String>();
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 70; i++) {
 			bl.add("Hello" + i);
 		}
-		Assert.assertEquals(20, bl.size());
+		Assert.assertEquals(70, bl.size());
 	}
 
 	@Test
-	public void testAdd20ToFront() {
+	public void testAdd70ToFront() {
 		BlockList<String> bl = new BlockList<String>();
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 70; i++) {
 			bl.add(0, "Hello" + i);
 		}
-		Assert.assertEquals(20, bl.size());
+		Assert.assertEquals(70, bl.size());
 	}
 
 	@Test
-	public void testGet20() {
+	public void testGet70() {
 		BlockList<String> bl = new BlockList<String>();
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 70; i++) {
 			bl.add(i, "Hello" + i);
 		}
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 70; i++) {
 			Assert.assertEquals("Hello" + i, bl.get(i));
 		}
 	}
 
 	@Test
-	public void testRemove20() {
+	public void testRemove70() {
 		BlockList<String> bl = new BlockList<String>();
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 70; i++) {
 			bl.add(i, "Hello" + i);
 		}
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 70; i++) {
 			bl.remove(0);
 		}
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 70; i++) {
 			bl.add(i, "Hello" + i);
 		}
-		for (int i = 19; i >= 0; i--) {
+		for (int i = 69; i >= 0; i--) {
 			bl.remove(0);
 		}
 		Assert.assertEquals(0, bl.size());
 	}
 
 	@Test
-	public void testRemoveAll20() {
+	public void testRemoveAll70() {
 		BlockList<String> bl = new BlockList<String>();
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 70; i++) {
 			bl.add(i, "Hello" + i);
 		}
 		bl.removeAll(Arrays.asList(new String[] { "Hello2", "Hello17"}));
-		Assert.assertEquals(18, bl.size());
+		Assert.assertEquals(68, bl.size());
 	}
 
 	@Test
-	public void testRetainAll20() {
+	public void testRetainAll70() {
 		BlockList<String> bl = new BlockList<String>();
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 70; i++) {
 			bl.add(i, "Hello" + i);
 		}
 		bl.retainAll(Arrays.asList(new String[] { "Hello2", "Hello17"}));
@@ -83,21 +83,21 @@ public class BlockListTest {
 	@Test
 	public void testToArray() {
 		BlockList<String> bl = new BlockList<String>();
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 70; i++) {
 			bl.add(i, "Hello" + i);
 		}
 
 		String[] result = bl.toArray(new String[0]);
-		Assert.assertEquals(20, result.length);
+		Assert.assertEquals(70, result.length);
 
-		result = bl.toArray(new String[20]);
-		Assert.assertEquals(20, result.length);
+		result = bl.toArray(new String[70]);
+		Assert.assertEquals(70, result.length);
 	}
 
 	@Test
 	public void testIterator() {
 		BlockList<String> bl = new BlockList<String>();
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 70; i++) {
 			bl.add(i, "Hello" + i);
 		}
 
@@ -111,7 +111,7 @@ public class BlockListTest {
 	@Test
 	public void testContains() {
 	    BlockList<String> bl = new BlockList<String>();
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 70; i++) {
             bl.add(i, "Hello" + i);
         }
         
@@ -125,7 +125,7 @@ public class BlockListTest {
 	@Test
 	public void testSerialization() throws IOException, ClassNotFoundException {
 		BlockList<String> bl = new BlockList<String>();
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 70; i++) {
 			bl.add(i, "Hello" + i);
 		}
 

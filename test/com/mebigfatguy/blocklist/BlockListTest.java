@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
 import org.junit.Assert;
@@ -140,5 +141,19 @@ public class BlockListTest {
 		BlockList<String> sbl = (BlockList<String>)ois.readObject();
 
 		Assert.assertEquals(bl, sbl);
+	}
+	
+	@Test(expected=ConcurrentModificationException.class)
+	public void testConcurrentModificationException() {
+	    BlockList<String> bl = new BlockList<String>();
+        for (int i = 0; i < 70; i++) {
+            bl.add(i, "Hello" + i);
+        }
+        
+        for (String s : bl) {
+            if (s.equals("Hello" + 4)) {
+                bl.remove("Hello" + 4);
+            }
+        }
 	}
 }

@@ -517,6 +517,8 @@ public class BlockList<E> implements List<E>, Externalizable {
 		int numBlocks = (size + (blockSize - 1)) / blockSize;
 		if (numBlocks > DEFAULT_BLOCK_COUNT) {
 			blocks = new Block[numBlocks];
+		} else {
+		    blocks = new Block[DEFAULT_BLOCK_COUNT];
 		}
 
 		int pos = 0;

@@ -50,6 +50,7 @@
                 <attribute name="Bundle-ClassPath" value="." />
                 <attribute name="Bundle-Vendor" value="blocklist Project" />
                 <attribute name="Bundle-ActivationPolicy" value="lazy" />
+            	<attribute name="Export-Package" value="com.mebigfatguy.blocklist;version=${blocklist.version}" />
             </manifest>
         </jar>
     </target>

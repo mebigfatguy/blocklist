@@ -2,3 +2,5 @@
 classes
 *.jar
 .settings/org.eclipse.jdt.core.prefs
+javadoc
+target

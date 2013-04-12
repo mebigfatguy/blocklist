@@ -136,7 +136,25 @@ public class BlockListTest {
 	}
 	
 	@Test
-	public void retainAll() {
+	public void testInsertAtBlockEdge() {
+	    BlockList<String> bl = new BlockList<String>(5);
+	    
+	    for (int i = 0; i < 20; i++) {
+	        bl.add("Hello" + i);
+	    }
+	    
+	    bl.add(14, "Insert" + 14);
+        bl.add(5, "Insert" + 5);
+        bl.add(1, "Insert" + 1);
+
+	    
+	    Assert.assertEquals(23, bl.size());
+        Assert.assertEquals("Insert" + 1, bl.get(1));
+        Assert.assertEquals("Insert" + 5, bl.get(6));
+        Assert.assertEquals("Insert" + 14, bl.get(16));
+	}
+	@Test
+	public void testRetainAll() {
        BlockList<String> bl1 = new BlockList<String>();
        for (int i = 0; i < 70; i++) {
            bl1.add(i, "Hello" + i);

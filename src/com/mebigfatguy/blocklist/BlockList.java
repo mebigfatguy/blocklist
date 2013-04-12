@@ -125,6 +125,7 @@ public class BlockList<E> implements List<E>, Externalizable {
 		Block<E> blk = blocks[blkIndex];
 		if (blk.emptyPos == blockSize){
 			splitBlock(blkIndex, blkOffset);
+			blk = blocks[blkIndex];
 		} else if (blkOffset < blk.emptyPos) {
 			System.arraycopy(blk.slots, blkOffset, blk.slots, blkOffset + 1, blk.emptyPos - blkOffset);
 		}
@@ -428,12 +429,17 @@ public class BlockList<E> implements List<E>, Externalizable {
 
 	private void splitBlock(int blockIndex, int blockOffset) {
 		Block<E>[] newBlocks = new Block[blocks.length+1];
-		System.arraycopy(blocks, 0, newBlocks, 0, blockIndex + 1);
-		System.arraycopy(blocks, blockIndex + 1, newBlocks, blockIndex+2, blocks.length - blockIndex - 1);
-		newBlocks[blockIndex+1] = new Block<E>();
-		System.arraycopy(newBlocks[blockIndex].slots, blockOffset, newBlocks[blockIndex+1].slots, 0, newBlocks[blockIndex].emptyPos - blockOffset);
-		newBlocks[blockIndex+1].emptyPos = newBlocks[blockIndex].emptyPos - blockOffset;
-		newBlocks[blockIndex].emptyPos = blockIndex;
+		System.arraycopy(blocks, 0, newBlocks, 0, blockIndex);
+		System.arraycopy(blocks, blockIndex, newBlocks, blockIndex + 1, blocks.length - blockIndex);
+		
+		newBlocks[blockIndex] = new Block<E>();
+		if (blockOffset != 0) {
+		    System.arraycopy(blocks[blockIndex].slots, 0, newBlocks[blockIndex].slots, 0, blockOffset);
+		    System.arraycopy(blocks[blockIndex].slots, blockOffset, newBlocks[blockIndex+1].slots, 0, blocks[blockIndex].emptyPos - blockOffset);
+		    Arrays.fill(newBlocks[blockIndex + 1].slots, blockSize - blockOffset, blockSize, null);
+		}
+		newBlocks[blockIndex+1].emptyPos = blocks[blockIndex].emptyPos - blockOffset;
+		newBlocks[blockIndex].emptyPos = blockOffset;
 		blocks = newBlocks;
 	}
 

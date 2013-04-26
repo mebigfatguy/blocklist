@@ -364,7 +364,7 @@ public class BlockList<E> implements List<E>, Externalizable {
 
 	@Override
 	public List<E> subList(int index, int length) {
-		throw new UnsupportedOperationException("BlockList.subList");
+		throw new UnsupportedOperationException("BlockList.subList not implemented yet");
 	}
 
 	@Override

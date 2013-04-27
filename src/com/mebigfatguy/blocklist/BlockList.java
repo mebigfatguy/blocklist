@@ -32,17 +32,17 @@ import java.util.ListIterator;
 /**
  * an implementation of List that uses blocks of arrays to store items.
  * The data structure is basically E[][], where E[] represents a list of 
- * blocks, and the the leaf elements hold the data. The Leaf arrays use
- * index 0 as a special element where the 'next empty position' is stored.
- * This value is stored as an Integer. Thus the real data is stored at 
+ * blocks, and the leaf arrays hold the data. The leaf arrays use
+ * index 0 as a special element where the 'next empty position' is stored, for
+ * that leaf array. This value is stored as an Integer. Thus the real data is stored at 
  * index 1 -> emptyPos in the leaf arrays.
  * 
  * The advantage to this List implementation is inserts anywhere never require the
- * reallocation of the entire list, nor the reshuffling of the entire list.
+ * reallocation of the entire list, nor the re-shuffling of the entire list.
  * The modifications are limited to moving the block array, and perhaps reallocating 
  * two leaf blocks.
  * 
- * Since the data is subblocks, there is no massive array allocated, making large lists
+ * Since the data is held in sub-blocks, there is no massive array allocated, making large lists
  * easier to allocate in memory.
  * 
  * This list is not thread safe.

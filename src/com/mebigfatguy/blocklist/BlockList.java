@@ -44,6 +44,8 @@ import java.util.ListIterator;
  * 
  * Since the data is subblocks, there is no massive array allocated, making large lists
  * easier to allocate in memory.
+ * 
+ * This list is not thread safe.
  */
 public class BlockList<E> implements List<E>, Externalizable {
 

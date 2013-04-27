@@ -446,14 +446,27 @@ public class BlockList<E> implements List<E>, Externalizable {
 	private long findBlock(int index, boolean forAdd) {
 		int offset = 0;
 
-		for (int b = 0; b < blocks.length; b++) {
-			E[] blk = blocks[b];
-			int emptyPos = ((Integer) blk[0]).intValue();
-			int nextOffset = offset + emptyPos;
-			if ((index < nextOffset) || (forAdd && ((index == nextOffset) && (emptyPos < blockSize)))) {
-				return (((long) b) << 32) | (index - offset);
-			}
-			offset = nextOffset;
+		if (index < (size / 2)) {
+    		for (int b = 0; b < blocks.length; ++b) {
+    			E[] blk = blocks[b];
+    			int emptyPos = ((Integer) blk[0]).intValue();
+    			int nextOffset = offset + emptyPos;
+    			if ((index < nextOffset) || (forAdd && ((index == nextOffset) && (emptyPos < blockSize)))) {
+    				return (((long) b) << 32) | (index - offset);
+    			}
+    			offset = nextOffset;
+    		}
+		} else {
+		    offset = size;
+		    for (int b = blocks.length-1; b >=0; --b) {
+		        E[] blk = blocks[b];
+		        int emptyPos = ((Integer) blk[0]).intValue();
+		        int nextOffset = offset - emptyPos;
+		        if (((index >= nextOffset) && (index < offset)) || (forAdd && ((index == offset) && (emptyPos < blockSize)))) {
+		            return (((long) b) << 32) | (index - nextOffset);
+                }
+                offset = nextOffset;
+		    }
 		}
 		return -1L;
 	}

@@ -20,7 +20,6 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,7 +35,7 @@ public class BlockList<E> implements List<E>, Externalizable {
 	public static final int DEFAULT_BLOCK_COUNT = 1;
 	public static final int DEFAULT_BLOCK_SIZE = 32;
 
-	private Block<E>[] blocks;
+	private E[][] blocks;
 	private int blockSize;
 	private int size;
 	private int revision;
@@ -50,11 +49,12 @@ public class BlockList<E> implements List<E>, Externalizable {
 	}
 
 	public BlockList(int initialBlkCount, int blkSize) {
-		blocks = new Block[initialBlkCount];
+		blocks = (E[][])new Object[initialBlkCount][];
 		blockSize = blkSize;
 		size = 0;
 		for (int b = 0; b < blocks.length; b++) {
-			blocks[b] = new Block<E>();
+			blocks[b] = (E[])new Object[1 + blockSize];
+			blocks[b][0] = (E)Integer.valueOf(0);
 		}
 		revision = 0;
 	}
@@ -104,8 +104,10 @@ public class BlockList<E> implements List<E>, Externalizable {
 		}
 
 		int blkIndex = (int)(blockPtr >> 32);
-		Block<E> blk = blocks[blkIndex];
-		blk.slots[blk.emptyPos++] = element;
+		E[] blk = blocks[blkIndex];
+		int emptyPos = ((Integer)blk[0]).intValue();
+		blk[1 + emptyPos++] = element;
+		blk[0] = (E)Integer.valueOf(emptyPos);
 		size++;
 		revision++;
 		return true;
@@ -122,16 +124,18 @@ public class BlockList<E> implements List<E>, Externalizable {
 		int blkIndex = (int)(blockPtr >> 32);
 		int blkOffset = (int)blockPtr;
 
-		Block<E> blk = blocks[blkIndex];
-		if (blk.emptyPos == blockSize){
+		E[] blk = blocks[blkIndex];
+		int emptyPos = ((Integer) blk[0]).intValue();
+		if (emptyPos == blockSize){
 			splitBlock(blkIndex, blkOffset);
 			blk = blocks[blkIndex];
-		} else if (blkOffset < blk.emptyPos) {
-			System.arraycopy(blk.slots, blkOffset, blk.slots, blkOffset + 1, blk.emptyPos - blkOffset);
+		} else if (blkOffset < emptyPos) {
+			System.arraycopy(blk, 1 + blkOffset, blk, 1 + blkOffset + 1, emptyPos - blkOffset);
 		}
 
-		blk.slots[blkOffset] = element;
-		blk.emptyPos++;
+		blk[1 + blkOffset] = element;
+		emptyPos = ((Integer) blk[0]).intValue();
+		blk[0] = (E) Integer.valueOf(emptyPos + 1);
 		size++;
 		revision++;
 	}
@@ -154,10 +158,11 @@ public class BlockList<E> implements List<E>, Externalizable {
 
 	@Override
 	public void clear() {
-		blocks = new Block[0];
+		blocks = (E[][]) new Object[0][];
 		size = 0;
 		for (int b = 0; b < blocks.length; b++) {
-			blocks[b] = new Block<E>();
+			blocks[b] = (E[]) new Object[1 + blockSize];
+			blocks[b][0] = (E) Integer.valueOf(0);
 		}
 		revision++;
 	}
@@ -168,9 +173,10 @@ public class BlockList<E> implements List<E>, Externalizable {
 			return false;
 		}
 
-		for (Block<E> blk : blocks) {
-			for (int s = 0; s < blk.emptyPos; s++) {
-				if (element.equals(blk.slots[s])) {
+		for (E[] blk : (E[][]) blocks) {
+		    int emptyPos = ((Integer) blk[0]).intValue();
+			for (int s = 0; s < emptyPos; s++) {
+				if (element.equals(blk[1+s])) {
 					return true;
 				}
 			}
@@ -199,8 +205,8 @@ public class BlockList<E> implements List<E>, Externalizable {
 		int blkIndex = (int)(blockPtr >> 32);
 		int blkOffset = (int)blockPtr;
 
-		Block<E> blk = blocks[blkIndex];
-		return blk.slots[blkOffset];
+		E[] blk = blocks[blkIndex];
+		return blk[1+blkOffset];
 	}
 
 	@Override
@@ -210,9 +216,10 @@ public class BlockList<E> implements List<E>, Externalizable {
 		}
 
 		int pos = 0;
-		for (Block<E> blk : blocks) {
-			for (int s = 0; s < blk.emptyPos; s++) {
-				if (element.equals(blk.slots[s])) {
+		for (E[] blk : blocks) {
+		    int emptyPos = ((Integer) blk[0]).intValue();
+			for (int s = 0; s < emptyPos; s++) {
+				if (element.equals(blk[1+s])) {
 					return pos;
 				}
 				pos++;
@@ -240,9 +247,10 @@ public class BlockList<E> implements List<E>, Externalizable {
 
 		int pos = size - 1;
 		for (int b = blocks.length - 1; b >= 0; b--) {
-			Block<E> blk = blocks[b];
-			for (int s = blk.emptyPos-1; s>= 0; s--) {
-				if (element.equals(blk.slots[s])) {
+			E[] blk = blocks[b];
+			int emptyPos = ((Integer) blk[0]).intValue();
+			for (int s = emptyPos-1; s>= 0; s--) {
+				if (element.equals(blk[1+s])) {
 					return pos;
 				}
 				pos--;
@@ -289,17 +297,18 @@ public class BlockList<E> implements List<E>, Externalizable {
 	}
 
 	protected E remove(int blkIndex, int blkOffset) {
-		Block<E> blk = blocks[blkIndex];
-		E e = blk.slots[blkOffset];
-		if (blk.emptyPos == 1) {
+		E[] blk = blocks[blkIndex];
+		E e = blk[1+blkOffset];
+		int emptyPos = ((Integer) blk[0]).intValue();
+		if (emptyPos == 1) {
 			System.arraycopy(blocks, blkIndex+1, blocks, blkIndex, blocks.length - blkIndex - 1);
 			blocks[blocks.length - 1] = blk;
 		} else {
-			System.arraycopy(blk.slots, blkOffset + 1, blk.slots, blkOffset, blk.emptyPos - blkOffset - 1);
+			System.arraycopy(blk, 1+blkOffset + 1, blk, 1+blkOffset, emptyPos - blkOffset - 1);
 
 		}
-		blk.slots[blk.emptyPos-1] = null;
-		blk.emptyPos--;
+		blk[1+emptyPos-1] = null;
+		blk[0] = (E) Integer.valueOf(emptyPos-1);
 		size--;
 		revision++;
 		return e;
@@ -320,14 +329,16 @@ public class BlockList<E> implements List<E>, Externalizable {
 
 		int pos = 0;
 		for (int b = 0; b < blocks.length; b++) {
-			Block<E> blk = blocks[b];
-			for (int s = 0; s < blk.emptyPos; s++) {
+			E[] blk = blocks[b];
+			int emptyPos = ((Integer) blk[0]).intValue();
+			for (int s = 0; s < emptyPos; s++) {
 
-				if (!elements.contains(blk.slots[s])) {
-					boolean blockRemoved = (blk.emptyPos == 1);
+				if (!elements.contains(blk[1+s])) {
+					boolean blockRemoved = (emptyPos == 1);
 					remove(pos);
 					changed = true;
 					s--;
+					emptyPos--;
 					if (blockRemoved) {
 						b--;
 					}
@@ -351,9 +362,9 @@ public class BlockList<E> implements List<E>, Externalizable {
 		int blkIndex = (int)(blockPtr >> 32);
 		int blkOffset = (int)blockPtr;
 
-		Block<E> blk = blocks[blkIndex];
-		E oldValue = blk.slots[blkOffset];
-		blk.slots[blkOffset] = element;
+		E[] blk = blocks[blkIndex];
+		E oldValue = blk[1+blkOffset];
+		blk[1+blkOffset] = element;
 		return oldValue;
 	}
 
@@ -371,9 +382,10 @@ public class BlockList<E> implements List<E>, Externalizable {
 	public Object[] toArray() {
 		Object[] o = new Object[size];
 		int pos = 0;
-		for (Block<E> blk : blocks) {
-			System.arraycopy(blk.slots, 0, o, pos, blk.emptyPos);
-			pos += blk.emptyPos;
+		for (E[] blk : blocks) {
+		    int emptyPos = ((Integer) blk[0]).intValue();
+			System.arraycopy(blk, 1+0, o, 1+pos, emptyPos);
+			pos += emptyPos;
 		}
 		return o;
 	}
@@ -386,9 +398,10 @@ public class BlockList<E> implements List<E>, Externalizable {
 		}
 
 		int pos = 0;
-		for (Block<E> blk : blocks) {
-			System.arraycopy(blk.slots, 0, proto, pos, blk.emptyPos);
-			pos += blk.emptyPos;
+		for (E[] blk : blocks) {
+		    int emptyPos = ((Integer) blk[0]).intValue();
+			System.arraycopy(blk, 1+0, proto, pos, emptyPos);
+			pos += emptyPos;
 		}
 		return proto;
 	}
@@ -398,9 +411,15 @@ public class BlockList<E> implements List<E>, Externalizable {
 		StringBuilder sb = new StringBuilder(size * 10);
 		String cr = "\n";
 		String sep = "";
-		for (Block<E> blk : blocks) {
-			sb.append(sep);
-			sb.append(blk);
+		String comma = "";
+		for (E[] blk : blocks) {
+	        sb.append(sep);
+		    int emptyPos = ((Integer) blk[0]).intValue();
+		    for (int i = 0; i < emptyPos; ++i) {
+		        sb.append(comma);
+		        sb.append(blk[1+i]);
+		        comma = ",";
+		    }
 			sep = cr;
 		}
 		return sb.toString();
@@ -410,9 +429,10 @@ public class BlockList<E> implements List<E>, Externalizable {
 		int offset = 0;
 
 		for (int b = 0; b < blocks.length; b++) {
-			Block<E> blk = blocks[b];
-			int nextOffset = offset + blk.emptyPos;
-			if ((index < nextOffset) || (forAdd && ((index == nextOffset) && (blk.emptyPos < blockSize)))) {
+			E[] blk = blocks[b];
+			int emptyPos = ((Integer) blk[0]).intValue();
+			int nextOffset = offset + emptyPos;
+			if ((index < nextOffset) || (forAdd && ((index == nextOffset) && (emptyPos < blockSize)))) {
 				return (((long) b) << 32) | (index - offset);
 			}
 			offset = nextOffset;
@@ -421,44 +441,28 @@ public class BlockList<E> implements List<E>, Externalizable {
 	}
 
 	private void grow() {
-		Block<E>[] newBlocks = new Block[blocks.length+1];
+		E[][] newBlocks = (E[][]) new Object[blocks.length+1][];
 		System.arraycopy(blocks, 0, newBlocks, 0, blocks.length);
-		newBlocks[blocks.length] = new Block<E>();
+		newBlocks[blocks.length] = (E[]) new Object[1+blockSize];
+		newBlocks[blocks.length][0] = (E) Integer.valueOf(0);
 		blocks = newBlocks;
 	}
 
 	private void splitBlock(int blockIndex, int blockOffset) {
-		Block<E>[] newBlocks = new Block[blocks.length+1];
+		E[][] newBlocks = (E[][]) new Object[blocks.length+1][];
 		System.arraycopy(blocks, 0, newBlocks, 0, blockIndex);
 		System.arraycopy(blocks, blockIndex, newBlocks, blockIndex + 1, blocks.length - blockIndex);
 		
-		newBlocks[blockIndex] = new Block<E>();
+		newBlocks[blockIndex] = (E[]) new Object[1+blockSize];
+        int emptyPos = ((Integer) blocks[blockIndex][0]).intValue();
 		if (blockOffset != 0) {
-		    System.arraycopy(blocks[blockIndex].slots, 0, newBlocks[blockIndex].slots, 0, blockOffset);
-		    System.arraycopy(blocks[blockIndex].slots, blockOffset, newBlocks[blockIndex+1].slots, 0, blocks[blockIndex].emptyPos - blockOffset);
-		    Arrays.fill(newBlocks[blockIndex + 1].slots, blockSize - blockOffset, blockSize, null);
+		    System.arraycopy(blocks[blockIndex], 1+0, newBlocks[blockIndex], 1+0, blockOffset);
+		    System.arraycopy(blocks[blockIndex], 1+blockOffset, newBlocks[blockIndex+1], 1+0, emptyPos - blockOffset);
+		    Arrays.fill(newBlocks[blockIndex + 1], 1+blockSize - blockOffset, 1+blockSize, null);
 		}
-		newBlocks[blockIndex+1].emptyPos = blocks[blockIndex].emptyPos - blockOffset;
-		newBlocks[blockIndex].emptyPos = blockOffset;
+		newBlocks[blockIndex+1][0] = (E) Integer.valueOf(emptyPos - blockOffset);
+		newBlocks[blockIndex][0] = (E) Integer.valueOf(blockOffset);
 		blocks = newBlocks;
-	}
-
-	private class Block<B> implements Serializable {
-
-		private static final long serialVersionUID = 6572073165518926427L;
-
-		B[] slots;
-		int emptyPos;
-
-		Block() {
-			slots = (B[])new Object[blockSize];
-			emptyPos = 0;
-		}
-
-		@Override
-		public String toString() {
-			return (emptyPos) + "|" + Arrays.toString(slots);
-		}
 	}
 
 	private class BlockListIterator implements Iterator<E> {
@@ -506,9 +510,10 @@ public class BlockList<E> implements List<E>, Externalizable {
 		out.writeInt(blockSize);
 		out.writeInt(size);
 
-		for (Block<E> blk : blocks) {
-			for (int s = 0; s < blk.emptyPos; s++) {
-				out.writeObject(blk.slots[s]);
+		for (E[] blk : blocks) {
+		    int emptyPos = ((Integer) blk[0]).intValue();
+			for (int s = 0; s < 1+emptyPos; s++) {
+				out.writeObject(blk[s]);
 			}
 		}
 	}
@@ -522,24 +527,24 @@ public class BlockList<E> implements List<E>, Externalizable {
 
 		int numBlocks = (size + (blockSize - 1)) / blockSize;
 		if (numBlocks > DEFAULT_BLOCK_COUNT) {
-			blocks = new Block[numBlocks];
+			blocks = (E[][]) new Object[numBlocks][];
 		} else {
-		    blocks = new Block[DEFAULT_BLOCK_COUNT];
+		    blocks = (E[][]) new Object[DEFAULT_BLOCK_COUNT][];
+		}
+		
+		for (int i = 0; i < numBlocks; i++) {
+		    blocks[i] = (E[]) new Object[1+blockSize];
+		    blocks[i][0] = (E) Integer.valueOf(0);
 		}
 
-		int pos = 0;
 		for (int i = 0; i < numBlocks; i++) {
-			Block<E> block = new Block<E>();
-			int j;
-			for (j = 0; j < blockSize; j++) {
-				if (pos++ >= size) {
-					break;
-				}
-
-				block.slots[j] = (E)in.readObject();
-			}
-			block.emptyPos = j;
-			blocks[i] = block;
+		    E[] blk = blocks[i];
+		    blk[0] = (E) in.readObject();
+		    
+		    int emptyPos = ((Integer) blk[0]).intValue();
+		    for (int s = 0; s < emptyPos; s++) {
+		        blk[1+s] = (E) in.readObject();
+		    }
 		}
 	}
 }

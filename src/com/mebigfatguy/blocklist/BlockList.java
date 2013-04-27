@@ -505,7 +505,7 @@ public class BlockList<E> implements List<E>, Externalizable {
 			}
 
 			if (pos >= size) {
-				throw new IndexOutOfBoundsException("");
+				throw new IndexOutOfBoundsException("Index (" + pos + ") is out of bounds [0 <= i < " + size + "]");
 			}
 
 			return get(pos++);

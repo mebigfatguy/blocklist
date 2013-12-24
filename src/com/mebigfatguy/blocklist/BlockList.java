@@ -191,7 +191,7 @@ public class BlockList<E> implements List<E>, Externalizable {
 			return false;
 		}
 
-		for (E[] blk : (E[][]) blocks) {
+		for (E[] blk : blocks) {
 		    int emptyPos = ((Integer) blk[0]).intValue();
 			for (int s = 0; s < emptyPos; s++) {
 				if (element.equals(blk[1+s])) {

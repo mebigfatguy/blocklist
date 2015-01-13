@@ -278,12 +278,12 @@ public class BlockList<E> implements List<E>, Externalizable {
 
 	@Override
 	public ListIterator<E> listIterator() {
-		throw new UnsupportedOperationException("listIterator");
+	    return new BlockListListIterator();
 	}
 
 	@Override
 	public ListIterator<E> listIterator(int index) {
-		throw new UnsupportedOperationException("listIterator");
+	    return new BlockListListIterator(index);
 	}
 
 	@Override
@@ -496,9 +496,8 @@ public class BlockList<E> implements List<E>, Externalizable {
 
 	private class BlockListIterator implements Iterator<E> {
 
-		private int pos = 0;
-		private int iteratorRevision = revision;
-
+		protected int pos = 0;
+		protected int iteratorRevision = revision;
 
 		@Override
 		public boolean hasNext() {
@@ -532,6 +531,73 @@ public class BlockList<E> implements List<E>, Externalizable {
 			iteratorRevision = revision;
 		}
 
+	}
+	
+	private class BlockListListIterator extends BlockListIterator implements ListIterator<E> {
+
+	    public BlockListListIterator() {
+	    }
+	    
+	    public BlockListListIterator(int start) {
+	        pos = start;
+	    }
+        @Override
+        public boolean hasPrevious() {
+            if (revision != iteratorRevision) {
+                throw new ConcurrentModificationException();
+            }
+            
+            return pos > 0;
+        }
+
+        @Override
+        public E previous() {
+            if (revision != iteratorRevision) {
+                throw new ConcurrentModificationException();
+            }
+            
+            if (pos > 0) {
+                throw new IndexOutOfBoundsException("Index (" + (pos-1) + ") is out of bounds [0 <= i < " + size + "]");
+            }
+
+            return get(--pos);
+        }
+
+        @Override
+        public int nextIndex() {
+            if (revision != iteratorRevision) {
+                throw new ConcurrentModificationException();
+            }
+            
+            return pos+1;
+        }
+
+        @Override
+        public int previousIndex() {
+            if (revision != iteratorRevision) {
+                throw new ConcurrentModificationException();
+            }
+            
+            return pos-1;
+        }
+
+        @Override
+        public void set(E e) {
+            if (revision != iteratorRevision) {
+                throw new ConcurrentModificationException();
+            }
+            
+            BlockList.this.set(pos, e);
+        }
+
+        @Override
+        public void add(E e) {
+            if (revision != iteratorRevision) {
+                throw new ConcurrentModificationException();
+            }
+            
+            BlockList.this.add(pos, e);
+        } 
 	}
 
 	@Override

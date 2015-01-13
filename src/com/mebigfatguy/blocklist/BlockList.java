@@ -90,9 +90,7 @@ public class BlockList<E> implements List<E>, Externalizable {
 				Object thatItem = that.get(i);
 
 				if (thisItem == null) {
-					if (thatItem != null) {
-						return false;
-					}
+					return (thatItem == null);
 				}
 
 				if (thatItem == null) {

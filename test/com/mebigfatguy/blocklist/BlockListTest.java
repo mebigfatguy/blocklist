@@ -189,7 +189,7 @@ public class BlockListTest {
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		ObjectInputStream ois = new ObjectInputStream(bais);
 
-		BlockList<String> sbl = (BlockList<String>)ois.readObject();
+		Object sbl = ois.readObject();
 
 		Assert.assertEquals(bl, sbl);
 	}

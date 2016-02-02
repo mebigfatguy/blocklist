@@ -51,7 +51,7 @@ public class BlockList<E> implements List<E>, Externalizable {
 
 	private static final long serialVersionUID = -2221663525758235084L;
 	public static final int DEFAULT_BLOCK_COUNT = 1;
-	public static final int DEFAULT_BLOCK_SIZE = 32;
+	public static final int DEFAULT_BLOCK_SIZE = 256;
 
 	private E[][] blocks;
 	private int blockSize;

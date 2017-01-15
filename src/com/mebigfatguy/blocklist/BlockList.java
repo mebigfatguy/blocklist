@@ -1,6 +1,6 @@
 /*
  * BlockList an alternative java.util.List
- * Copyright 2011-2016 MeBigFatGuy.com
+ * Copyright 2011-2017 MeBigFatGuy.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

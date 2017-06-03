@@ -47,16 +47,6 @@
     </properties>
 
     <build>
-        <sourceDirectory>${basedir}/src</sourceDirectory>
-        <resources>
-            <resource>
-                <directory>${basedir}</directory>
-                <includes>
-                    <include>license.txt</include>
-                </includes>
-            </resource>
-        </resources>
-
         <pluginManagement>
             <plugins>
                 <plugin>

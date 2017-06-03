@@ -2,7 +2,7 @@
 
     <property file="build.properties" />
     
-    <property name="src.dir" value="${basedir}/src" />
+    <property name="src.dir" value="${basedir}/src/main/java" />
     <property name="classes.dir" value="${basedir}/classes" />
     <property name="javadoc.dir" value="${basedir}/javadoc" />
     

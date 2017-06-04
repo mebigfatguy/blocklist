@@ -106,7 +106,16 @@ public class BlockList<E> implements List<E>, Externalizable {
 
     @Override
     public int hashCode() {
-        return size;
+        int hc = 1;
+        for (E[] blk : blocks) {
+            int emptyPos = ((Integer) blk[0]).intValue();
+            for (int s = 0; s < emptyPos; s++) {
+                E e = blk[1 + s];
+                hc += (31 * hc) + ((e == null) ? 0 : e.hashCode());
+            }
+        }
+
+        return hc;
     }
 
     @Override

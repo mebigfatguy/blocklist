@@ -27,6 +27,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.NoSuchElementException;
 
 @SuppressWarnings("unchecked")
 /**
@@ -512,7 +513,7 @@ public class BlockList<E> implements List<E>, Externalizable {
             }
 
             if (pos >= size) {
-                throw new IndexOutOfBoundsException("Index (" + pos + ") is out of bounds [0 <= i < " + size + "]");
+                throw new NoSuchElementException("Index (" + pos + ") is out of bounds [0 <= i < " + size + "]");
             }
 
             return get(pos++);

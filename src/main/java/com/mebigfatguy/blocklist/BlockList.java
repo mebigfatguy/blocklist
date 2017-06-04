@@ -424,7 +424,7 @@ public class BlockList<E> implements List<E>, Externalizable {
         for (E[] blk : blocks) {
             int emptyPos = ((Integer) blk[0]).intValue();
             if (emptyPos > 0) {
-                System.arraycopy(blk, 1 + 0, o, 1 + pos, emptyPos);
+                System.arraycopy(blk, 1 + 0, o, pos, emptyPos);
                 pos += emptyPos;
             }
         }

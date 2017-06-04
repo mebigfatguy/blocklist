@@ -352,9 +352,24 @@ public class BlockList<E> implements List<E>, Externalizable {
     @Override
     public boolean removeAll(Collection<?> elements) {
         boolean removed = false;
-        for (Object e : elements) {
-            removed |= remove(e);
+
+        for (Object o : elements) {
+            for (E[] blk : blocks) {
+                int emptyPos = ((Integer) blk[0]).intValue();
+                for (int s = 0; s < emptyPos; s++) {
+                    if (Objects.equals(o, blk[1 + s])) {
+                        System.arraycopy(blk, 1 + s + 1, blk, 1 + s, emptyPos - s - 1);
+                        blk[emptyPos] = null;
+                        emptyPos--;
+                        blk[0] = (E) Integer.valueOf(emptyPos);
+                        s--;
+                        removed = true;
+                    }
+                }
+            }
         }
+
+        ++revision;
         return removed;
     }
 

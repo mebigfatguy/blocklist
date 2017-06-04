@@ -5,3 +5,13 @@ BlockList never needs reallocations of existing element arrays, nor does it suff
 Getting a value at an index is much faster than linked list, but marginally slower than ArrayList.
 
 
+Available from maven central with coordinates
+
+* groupId: com.mebigfatguy.blocklist
+* artifactId: blocklist
+* version: 0.4.0
+
+The List is available as class
+
+* com.mebigfatguy.blocklist.BlockList
+

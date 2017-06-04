@@ -277,16 +277,12 @@ public class BlockList<E> implements List<E>, Externalizable {
 
     @Override
     public int lastIndexOf(Object element) {
-        if (element == null) {
-            return -1;
-        }
-
         int pos = size - 1;
         for (int b = blocks.length - 1; b >= 0; b--) {
             E[] blk = blocks[b];
             int emptyPos = ((Integer) blk[0]).intValue();
             for (int s = emptyPos - 1; s >= 0; s--) {
-                if (element.equals(blk[1 + s])) {
+                if (Objects.equals(element, blk[1 + s])) {
                     return pos;
                 }
                 pos--;

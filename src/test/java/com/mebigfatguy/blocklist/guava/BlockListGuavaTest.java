@@ -29,7 +29,7 @@ public class BlockListGuavaTest {
                 return list;
             }
 
-        }).named("Guava List Test").withFeatures(CollectionSize.ANY, CollectionFeature.FAILS_FAST_ON_CONCURRENT_MODIFICATION, ListFeature.GENERAL_PURPOSE)
-                .createTestSuite();
+        }).named("Guava List Test").withFeatures(CollectionSize.ANY, CollectionFeature.FAILS_FAST_ON_CONCURRENT_MODIFICATION, ListFeature.GENERAL_PURPOSE,
+                CollectionFeature.ALLOWS_NULL_VALUES).createTestSuite();
     }
 }

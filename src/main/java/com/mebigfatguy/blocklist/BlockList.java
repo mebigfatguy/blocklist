@@ -431,19 +431,17 @@ public class BlockList<E> implements List<E>, Externalizable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(size * 10);
-        String cr = "\n";
-        String sep = "";
+        sb.append('[');
         String comma = "";
         for (E[] blk : blocks) {
-            sb.append(sep);
             int emptyPos = ((Integer) blk[0]).intValue();
             for (int i = 0; i < emptyPos; ++i) {
                 sb.append(comma);
                 sb.append(blk[1 + i]);
-                comma = ",";
+                comma = ", ";
             }
-            sep = cr;
         }
+        sb.append(']');
         return sb.toString();
     }
 

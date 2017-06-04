@@ -417,6 +417,10 @@ public class BlockList<E> implements List<E>, Externalizable {
             System.arraycopy(blk, 1 + 0, proto, pos, emptyPos);
             pos += emptyPos;
         }
+
+        if (pos < proto.length) {
+            proto[pos] = null;
+        }
         return proto;
     }
 
@@ -494,8 +498,10 @@ public class BlockList<E> implements List<E>, Externalizable {
 
     private class BlockListIterator implements Iterator<E> {
 
-        protected int pos = 0;
         protected int iteratorRevision = revision;
+        protected int pos = -1;
+        protected int activePos = -1;
+        private boolean primed;
 
         @Override
         public boolean hasNext() {
@@ -503,6 +509,13 @@ public class BlockList<E> implements List<E>, Externalizable {
                 throw new ConcurrentModificationException();
             }
 
+            if (primed) {
+                return pos < size;
+            }
+
+            ++pos;
+
+            primed = true;
             return pos < size;
         }
 
@@ -512,11 +525,17 @@ public class BlockList<E> implements List<E>, Externalizable {
                 throw new ConcurrentModificationException();
             }
 
+            if (!primed) {
+                ++pos;
+            }
+
             if (pos >= size) {
                 throw new NoSuchElementException("Index (" + pos + ") is out of bounds [0 <= i < " + size + "]");
             }
 
-            return get(pos++);
+            activePos = pos;
+            primed = false;
+            return get(pos);
         }
 
         @Override
@@ -525,7 +544,14 @@ public class BlockList<E> implements List<E>, Externalizable {
                 throw new ConcurrentModificationException();
             }
 
+            if (activePos < 0) {
+                throw new IllegalStateException("You must call next() before remove()");
+            }
+
             BlockList.this.remove(pos);
+            activePos = -1;
+            pos -= 1;
+            primed = false;
             iteratorRevision = revision;
         }
 

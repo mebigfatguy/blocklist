@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 @SuppressWarnings("unchecked")
 /**
@@ -210,14 +211,11 @@ public class BlockList<E> implements List<E>, Externalizable {
 
     @Override
     public boolean contains(Object element) {
-        if (element == null) {
-            return false;
-        }
 
         for (E[] blk : blocks) {
             int emptyPos = ((Integer) blk[0]).intValue();
             for (int s = 0; s < emptyPos; s++) {
-                if (element.equals(blk[1 + s])) {
+                if (Objects.equals(element, blk[1 + s])) {
                     return true;
                 }
             }

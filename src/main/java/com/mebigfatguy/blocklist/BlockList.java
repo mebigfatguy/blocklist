@@ -250,15 +250,12 @@ public class BlockList<E> implements List<E>, Externalizable {
 
     @Override
     public int indexOf(Object element) {
-        if (element == null) {
-            return -1;
-        }
 
         int pos = 0;
         for (E[] blk : blocks) {
             int emptyPos = ((Integer) blk[0]).intValue();
             for (int s = 0; s < emptyPos; s++) {
-                if (element.equals(blk[1 + s])) {
+                if (Objects.equals(element, blk[1 + s])) {
                     return pos;
                 }
                 pos++;

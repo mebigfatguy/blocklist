@@ -531,8 +531,8 @@ public class BlockList<E> implements List<E>, Externalizable {
     private class BlockListIterator implements Iterator<E> {
 
         protected int iteratorRevision = revision;
-        protected int pos = -1;
-        protected boolean nextCalled = false;
+        protected int pos = 0;
+        protected int returnedPos = -1;
 
         @Override
         public boolean hasNext() {
@@ -540,7 +540,7 @@ public class BlockList<E> implements List<E>, Externalizable {
                 throw new ConcurrentModificationException();
             }
 
-            return ((pos + 1) < size);
+            return pos < size;
         }
 
         @Override
@@ -549,14 +549,12 @@ public class BlockList<E> implements List<E>, Externalizable {
                 throw new ConcurrentModificationException();
             }
 
-            ++pos;
-            nextCalled = true;
-
             if (pos >= size) {
                 throw new NoSuchElementException("Index (" + pos + ") is out of bounds [0 <= i < " + size + "]");
             }
 
-            return get(pos);
+            returnedPos = pos++;
+            return get(returnedPos);
         }
 
         @Override
@@ -565,17 +563,13 @@ public class BlockList<E> implements List<E>, Externalizable {
                 throw new ConcurrentModificationException();
             }
 
-            if (!nextCalled) {
-                throw new IllegalStateException("No next called");
-            }
-            nextCalled = false;
-
-            if (pos < 0) {
-                throw new IllegalStateException("You must call next() before remove()");
+            if (returnedPos < 0) {
+                throw new IllegalStateException("No object returned previously");
             }
 
-            BlockList.this.remove(pos);
-            pos--;
+            BlockList.this.remove(returnedPos);
+            pos = returnedPos;
+            returnedPos = -1;
             iteratorRevision = revision;
         }
 
@@ -605,11 +599,14 @@ public class BlockList<E> implements List<E>, Externalizable {
                 throw new ConcurrentModificationException();
             }
 
-            if (pos < 0) {
+            if ((pos - 1) < 0) {
                 throw new NoSuchElementException("Index (" + (pos - 1) + ") is out of bounds [0 <= i < " + size + "]");
             }
 
-            return get(pos--);
+            --pos;
+            returnedPos = pos;
+
+            return get(pos);
         }
 
         @Override
@@ -618,7 +615,7 @@ public class BlockList<E> implements List<E>, Externalizable {
                 throw new ConcurrentModificationException();
             }
 
-            return nextCalled ? pos : pos + 1;
+            return pos;
         }
 
         @Override
@@ -627,10 +624,7 @@ public class BlockList<E> implements List<E>, Externalizable {
                 throw new ConcurrentModificationException();
             }
 
-            if (pos < -1) {
-                throw new IndexOutOfBoundsException("Invalid index: " + pos);
-            }
-            return pos;
+            return pos - 1;
         }
 
         @Override
@@ -639,11 +633,11 @@ public class BlockList<E> implements List<E>, Externalizable {
                 throw new ConcurrentModificationException();
             }
 
-            if (!nextCalled) {
-                throw new IllegalStateException("Invalid index: " + pos);
+            if (returnedPos < 0) {
+                throw new IllegalStateException("a value hasn't been returned");
             }
 
-            BlockList.this.set(pos, e);
+            BlockList.this.set(returnedPos, e);
             iteratorRevision = revision;
         }
 
@@ -653,13 +647,12 @@ public class BlockList<E> implements List<E>, Externalizable {
                 throw new ConcurrentModificationException();
             }
 
-            ++pos;
-
             if (pos > size) {
                 throw new IndexOutOfBoundsException("Invalid index: " + pos);
             }
 
-            BlockList.this.add(pos, e);
+            BlockList.this.add(pos++, e);
+            returnedPos = -1;
             iteratorRevision = revision;
         }
     }

@@ -308,6 +308,9 @@ public class BlockList<E> implements List<E>, Externalizable {
 
     @Override
     public ListIterator<E> listIterator(int index) {
+        if ((index < 0) || (index > size)) {
+            throw new IndexOutOfBoundsException("Invalid index: " + index);
+        }
         return new BlockListListIterator(index);
     }
 

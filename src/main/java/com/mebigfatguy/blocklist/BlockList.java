@@ -112,7 +112,7 @@ public class BlockList<E> implements List<E>, Externalizable {
             int emptyPos = ((Integer) blk[0]).intValue();
             for (int s = 0; s < emptyPos; s++) {
                 E e = blk[1 + s];
-                hc += (31 * hc) + ((e == null) ? 0 : e.hashCode());
+                hc = (31 * hc) + ((e == null) ? 0 : e.hashCode());
             }
         }
 

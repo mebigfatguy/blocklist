@@ -129,6 +129,10 @@ public class BlockList<E> implements List<E>, Externalizable {
 
     @Override
     public void add(int index, E element) {
+        if ((index < 0) || (index > size)) {
+            throw new IndexOutOfBoundsException("Invalid index: " + index);
+        }
+
         long blockPtr = findBlock(index, true);
         if (blockPtr < 0) {
             grow();
@@ -156,6 +160,11 @@ public class BlockList<E> implements List<E>, Externalizable {
 
     @Override
     public boolean addAll(Collection<? extends E> elements) {
+
+        if (elements.isEmpty()) {
+            return false;
+        }
+
         for (E e : elements) {
             add(e);
         }
@@ -164,6 +173,15 @@ public class BlockList<E> implements List<E>, Externalizable {
 
     @Override
     public boolean addAll(int index, Collection<? extends E> elements) {
+
+        if ((index < 0) || (index > size)) {
+            throw new IndexOutOfBoundsException("Invalid index: " + index);
+        }
+
+        if (elements.isEmpty()) {
+            return false;
+        }
+
         for (E e : elements) {
             add(index++, e);
         }

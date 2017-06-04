@@ -532,8 +532,7 @@ public class BlockList<E> implements List<E>, Externalizable {
 
         protected int iteratorRevision = revision;
         protected int pos = -1;
-        protected int activePos = -1;
-        private boolean primed;
+        protected boolean nextCalled = false;
 
         @Override
         public boolean hasNext() {
@@ -541,14 +540,7 @@ public class BlockList<E> implements List<E>, Externalizable {
                 throw new ConcurrentModificationException();
             }
 
-            if (primed) {
-                return pos < size;
-            }
-
-            ++pos;
-
-            primed = true;
-            return pos < size;
+            return ((pos + 1) < size);
         }
 
         @Override
@@ -557,16 +549,13 @@ public class BlockList<E> implements List<E>, Externalizable {
                 throw new ConcurrentModificationException();
             }
 
-            if (!primed) {
-                ++pos;
-            }
+            ++pos;
+            nextCalled = true;
 
             if (pos >= size) {
                 throw new NoSuchElementException("Index (" + pos + ") is out of bounds [0 <= i < " + size + "]");
             }
 
-            activePos = pos;
-            primed = false;
             return get(pos);
         }
 
@@ -576,14 +565,17 @@ public class BlockList<E> implements List<E>, Externalizable {
                 throw new ConcurrentModificationException();
             }
 
-            if (activePos < 0) {
+            if (!nextCalled) {
+                throw new IllegalStateException("No next called");
+            }
+            nextCalled = false;
+
+            if (pos < 0) {
                 throw new IllegalStateException("You must call next() before remove()");
             }
 
             BlockList.this.remove(pos);
-            activePos = -1;
-            pos -= 1;
-            primed = false;
+            pos--;
             iteratorRevision = revision;
         }
 
@@ -613,11 +605,11 @@ public class BlockList<E> implements List<E>, Externalizable {
                 throw new ConcurrentModificationException();
             }
 
-            if (pos > 0) {
-                throw new IndexOutOfBoundsException("Index (" + (pos - 1) + ") is out of bounds [0 <= i < " + size + "]");
+            if (pos < 0) {
+                throw new NoSuchElementException("Index (" + (pos - 1) + ") is out of bounds [0 <= i < " + size + "]");
             }
 
-            return get(--pos);
+            return get(pos--);
         }
 
         @Override
@@ -626,7 +618,7 @@ public class BlockList<E> implements List<E>, Externalizable {
                 throw new ConcurrentModificationException();
             }
 
-            return pos + 1;
+            return nextCalled ? pos : pos + 1;
         }
 
         @Override
@@ -635,7 +627,10 @@ public class BlockList<E> implements List<E>, Externalizable {
                 throw new ConcurrentModificationException();
             }
 
-            return pos - 1;
+            if (pos < -1) {
+                throw new IndexOutOfBoundsException("Invalid index: " + pos);
+            }
+            return pos;
         }
 
         @Override
@@ -644,7 +639,12 @@ public class BlockList<E> implements List<E>, Externalizable {
                 throw new ConcurrentModificationException();
             }
 
+            if (!nextCalled) {
+                throw new IllegalStateException("Invalid index: " + pos);
+            }
+
             BlockList.this.set(pos, e);
+            iteratorRevision = revision;
         }
 
         @Override
@@ -653,7 +653,14 @@ public class BlockList<E> implements List<E>, Externalizable {
                 throw new ConcurrentModificationException();
             }
 
+            ++pos;
+
+            if (pos > size) {
+                throw new IndexOutOfBoundsException("Invalid index: " + pos);
+            }
+
             BlockList.this.add(pos, e);
+            iteratorRevision = revision;
         }
     }
 

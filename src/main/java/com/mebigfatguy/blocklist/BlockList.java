@@ -97,6 +97,7 @@ public class BlockList<E> implements List<E>, Externalizable {
                     return false;
                 }
             }
+            return true;
         }
 
         return false;

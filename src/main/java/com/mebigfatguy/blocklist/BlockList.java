@@ -45,6 +45,7 @@ public class BlockList<E> implements List<E>, Externalizable {
 
     private static final long serialVersionUID = -2221663525758235084L;
     public static final int DEFAULT_BLOCK_COUNT = 1;
+    public static final int MINIMUM_BLOCK_SIZE = 64;
     public static final int DEFAULT_BLOCK_SIZE = 256;
 
     private E[][] blocks;
@@ -57,7 +58,7 @@ public class BlockList<E> implements List<E>, Externalizable {
     }
 
     public BlockList(int blockSize) {
-        this(DEFAULT_BLOCK_COUNT, blockSize);
+        this(DEFAULT_BLOCK_COUNT, blockSize < MINIMUM_BLOCK_SIZE ? MINIMUM_BLOCK_SIZE : blockSize);
     }
 
     public BlockList(int initialBlkCount, int blkSize) {

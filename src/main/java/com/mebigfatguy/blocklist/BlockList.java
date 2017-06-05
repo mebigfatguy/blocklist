@@ -77,32 +77,32 @@ public class BlockList<E> implements List<E>, Externalizable {
     @Override
     public boolean equals(Object o) {
 
-        if (o instanceof List) {
-            List<E> that = (List<E>) o;
-            if (this.size != that.size()) {
+        if (!(o instanceof List)) {
+            return false;
+        }
+
+        List<E> that = (List<E>) o;
+        if (this.size != that.size()) {
+            return false;
+        }
+
+        for (int i = 0; i < size; i++) {
+            Object thisItem = get(i);
+            Object thatItem = that.get(i);
+
+            if (thisItem == null) {
+                return (thatItem == null);
+            }
+
+            if (thatItem == null) {
                 return false;
             }
 
-            for (int i = 0; i < size; i++) {
-                Object thisItem = get(i);
-                Object thatItem = that.get(i);
-
-                if (thisItem == null) {
-                    return (thatItem == null);
-                }
-
-                if (thatItem == null) {
-                    return false;
-                }
-
-                if (!thisItem.equals(thatItem)) {
-                    return false;
-                }
+            if (!thisItem.equals(thatItem)) {
+                return false;
             }
-            return true;
         }
-
-        return false;
+        return true;
     }
 
     @Override

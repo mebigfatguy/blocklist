@@ -1,0 +1,4 @@
+<Project projectName="blocklist">
+  <Jar>./classes</Jar>
+  <SrcDir>./src/main/java</SrcDir>
+</Project>
